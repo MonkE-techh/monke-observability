@@ -1,0 +1,50 @@
+# Registry of every app that reports to the shared PostHog project.
+# The nightly rollup and the dashboard script read this file. Add an app here first
+# (see README "Add an app"), then set its Render environment variables.
+#
+# Fields:
+#   name             value of APP_NAME / app_name on every event (kebab-case, never change it)
+#   repo             GitHub repo
+#   render_services  Render service names that belong to the app
+#   backend          python-fastapi | node-express | none
+#   uses_llm         true if the app calls an LLM (needs the LLM recorder)
+#   sample_rate      share of non-error api_request events kept (0 < rate <= 1); errors are always kept
+#   expected_daily_requests  rough estimate, used to keep the project under ~1M events a month
+#   status           planned | pilot | live
+
+apps:
+  - name: engagement-bot-checker
+    repo: MonkE-techh/engagementAuthCalc
+    render_services: []          # TODO: fill from `render services` (web, api, worker)
+    backend: python-fastapi
+    uses_llm: true               # Groq, called from the arq worker
+    sample_rate: 1.0
+    expected_daily_requests: null
+    status: pilot
+
+  - name: keyword-radar
+    repo: MonkE-techh/KeywordRadar
+    render_services: []          # TODO: radar-web, radar-dashboard, 5 cron jobs
+    backend: python-fastapi
+    uses_llm: true               # Groq / OpenRouter, called from the agent (cron)
+    sample_rate: 1.0
+    expected_daily_requests: null
+    status: planned
+
+  - name: creator-curation
+    repo: MonkE-techh/creatorCurration_monkE
+    render_services: [monke-creator-web, monke-creator-api]
+    backend: python-fastapi
+    uses_llm: false
+    sample_rate: 1.0             # job-history polling route must be excluded, not sampled
+    expected_daily_requests: null
+    status: planned
+
+  - name: campaign-dashboard
+    repo: MonkE-techh/monkE-CampaignDashboard
+    render_services: []          # TODO: static frontend + Python backend
+    backend: python-fastapi
+    uses_llm: false
+    sample_rate: 1.0
+    expected_daily_requests: null
+    status: planned
